@@ -13,10 +13,10 @@ pipeline {
             steps {
                 script {
                     echo 'Cleaning up previous containers and images...'
-                    sh '''
+                    sh """
                         docker-compose down --remove-orphans || true
                         docker rm -f ${CONTAINER_NAME} || true
-                    '''
+                    """
                 }
             }
         }
@@ -49,7 +49,7 @@ pipeline {
             steps {
                 script {
                     echo 'Verifying Docker image...'
-                    sh 'docker images | grep ${IMAGE_NAME}'
+                    sh "docker images | grep \${IMAGE_NAME}"
                 }
             }
         }
