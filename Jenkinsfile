@@ -73,40 +73,41 @@ pipeline {
                 script {
                     echo 'Performing health check...'
                     sh '''
-                        MAX_RETRIES=30
-                        RETRY_COUNT=0
-                        HEALTH_URL="http://localhost:3000/health"
-                        
                         echo "Starting health check for application..."
-                        echo "Target: $HEALTH_URL"
                         echo "----------------------------------------"
                         
+                        # Wait for container to be healthy using docker inspect
+                        MAX_RETRIES=30
+                        RETRY_COUNT=0
+                        
                         while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-                            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" 2>/dev/null || echo "000")
+                            HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' cicd-demo-app 2>/dev/null || echo "unknown")
                             
-                            if [ "$HTTP_STATUS" = "200" ]; then
+                            if [ "$HEALTH_STATUS" = "healthy" ]; then
                                 echo "✓ Health check PASSED"
-                                echo "----------------------------------------"
-                                echo "Response from health endpoint:"
-                                curl -s "$HEALTH_URL"
-                                echo ""
                                 echo "----------------------------------------"
                                 echo "Container status:"
                                 docker ps | grep cicd-demo-app
+                                echo "Container health: $HEALTH_STATUS"
+                                echo "----------------------------------------"
+                                echo "Container logs (last 10 lines):"
+                                docker logs --tail 10 cicd-demo-app
                                 echo "----------------------------------------"
                                 echo "SUCCESS: Application is healthy and running!"
                                 exit 0
                             fi
                             
                             RETRY_COUNT=$((RETRY_COUNT + 1))
-                            echo "Attempt $RETRY_COUNT/$MAX_RETRIES - Status: $HTTP_STATUS - Retrying in 2s..."
+                            echo "Attempt $RETRY_COUNT/$MAX_RETRIES - Health Status: $HEALTH_STATUS - Retrying in 2s..."
                             sleep 2
                         done
                         
                         echo "✗ Health check FAILED after $MAX_RETRIES attempts"
                         echo "----------------------------------------"
+                        echo "Final container status:"
+                        docker ps -a | grep cicd-demo-app
                         echo "Container logs:"
-                        docker logs cicd-demo-app 2>/dev/null || echo "Could not retrieve logs"
+                        docker logs cicd-demo-app
                         exit 1
                     '''
                 }
