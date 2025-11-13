@@ -63,7 +63,7 @@ pipeline {
                     echo 'Deploying application with Docker Compose...'
                     sh 'docker-compose up -d'
                     echo 'Waiting for container to start...'
-                    sleep 10
+                    sleep 15
                 }
             }
         }

@@ -9,19 +9,17 @@ echo "Target: $HEALTH_URL"
 echo "----------------------------------------"
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" 2>/dev/null || echo "000")
     
-    if [ "$HTTP_STATUS" -eq 200 ]; then
+    if [ "$HTTP_STATUS" = "200" ]; then
         echo "✓ Health check PASSED"
         echo "----------------------------------------"
         echo "Response from health endpoint:"
-        curl -s $HEALTH_URL | jq '.'
+        curl -s "$HEALTH_URL"
+        echo ""
         echo "----------------------------------------"
         echo "Container status:"
         docker ps | grep cicd-demo-app
-        echo "----------------------------------------"
-        echo "Container health:"
-        docker inspect --format='{{.State.Health.Status}}' cicd-demo-app
         echo "----------------------------------------"
         echo "SUCCESS: Application is healthy and running!"
         exit 0
@@ -35,5 +33,5 @@ done
 echo "✗ Health check FAILED after $MAX_RETRIES attempts"
 echo "----------------------------------------"
 echo "Container logs:"
-docker logs cicd-demo-app
+docker logs cicd-demo-app || echo "No container logs available"
 exit 1
