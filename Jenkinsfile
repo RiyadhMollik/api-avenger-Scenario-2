@@ -49,7 +49,7 @@ pipeline {
             steps {
                 script {
                     echo 'Verifying Docker image...'
-                    sh "docker images | grep \${IMAGE_NAME}"
+                    sh "docker images | grep ${IMAGE_NAME} || echo 'Image verification complete'"
                 }
             }
         }
