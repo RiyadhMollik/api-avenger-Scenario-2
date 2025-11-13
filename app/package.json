@@ -1,0 +1,25 @@
+{
+  "name": "cicd-demo-app",
+  "version": "1.0.0",
+  "description": "Demo application for CI/CD pipeline",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest --coverage --detectOpenHandles"
+  },
+  "keywords": ["cicd", "docker", "jenkins"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": ["/node_modules/"],
+    "testTimeout": 10000
+  }
+}
